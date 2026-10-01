@@ -1,0 +1,11 @@
+transaction_id,amount,category,status,customer,transaction_date
+TXN001,500,Retail,completed,Customer1,2026-08-01
+TXN002,750,Software,completed,Customer2,2026-08-02
+TXN003,1200,Services,completed,Customer3,2026-08-03
+TXN004,45000,Marketing,completed,Customer4,2026-08-04
+TXN005,1500,Retail,failed,Customer5,2026-08-05
+TXN006,20000,Logistics,refunded,Customer6,2026-08-06
+TXN007,800,Office,completed,Customer7,2026-08-07
+TXN008,35000,Travel,completed,Customer8,2026-08-08
+TXN009,900,Retail,completed,Customer9,2026-08-09
+TXN010,25000,Software,failed,Customer10,2026-08-10

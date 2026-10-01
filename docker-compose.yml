@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: finguard-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: finguard
+      POSTGRES_USER: finguard_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - finguard_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finguard_user -d finguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: finguard-backend
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://finguard_user:${POSTGRES_PASSWORD}@postgres:5432/finguard
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command: >
+      sh -c "
+      alembic upgrade head &&
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      "
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+
+    container_name: finguard-frontend
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+volumes:
+  finguard_postgres_data:
